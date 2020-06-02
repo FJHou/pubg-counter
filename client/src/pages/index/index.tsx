@@ -1,11 +1,17 @@
 import Taro, { Component, Config } from '@tarojs/taro';
 import { View } from '@tarojs/components';
 import './index.less';
-import { AtInputNumber, AtCard } from 'taro-ui';
+import { AtInputNumber, AtCard, AtButton } from 'taro-ui';
 
-// import Login from '../../components/login/index';
-
-export default class Index extends Component {
+interface IMember {
+  name: string;
+  value: number;
+}
+interface IndexState {
+  value: number;
+  members: IMember[];
+}
+export default class Index extends Component<{}, IndexState> {
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -23,7 +29,7 @@ export default class Index extends Component {
       value: 1,
       members: [
         {
-          name: '老鹏哥',
+          name: '鹏哥',
           value: 0,
         },
         {
@@ -31,7 +37,7 @@ export default class Index extends Component {
           value: 0,
         },
         {
-          name: '老豆子',
+          name: '豆子',
           value: 0,
         },
         {
@@ -60,6 +66,24 @@ export default class Index extends Component {
     });
   }
 
+  payInfo(me: IMember) {
+    const { name: myName, value: myValue } = me;
+    const { members, value: ratio } = this.state;
+    return members
+      .filter((member) => member.name !== myName)
+      .map((member) => {
+        const { name, value } = member;
+        const diff = value - myValue;
+        const price = diff <= 0 ? 0 : diff * ratio;
+        return (
+          <View key={name}>
+            {name}
+            <Text className='award'> {price} </Text>元
+          </View>
+        );
+      });
+  }
+
   componentWillMount() {}
 
   componentDidMount() {
@@ -82,8 +106,7 @@ export default class Index extends Component {
   render() {
     return (
       <View className='index'>
-        {/* <Login /> */}
-        <AtCard title='概览'>
+        <AtCard title='概览' className='card'>
           <View className='cell'>
             <Text>人头价值：</Text>
             <AtInputNumber
@@ -96,10 +119,10 @@ export default class Index extends Component {
           </View>
         </AtCard>
 
-        <AtCard title='队员'>
+        <AtCard title='统计' className='card'>
           {this.state.members.map((member) => {
             return (
-              <View className='cell'>
+              <View className='cell' key={member.name}>
                 <Text>{member.name}</Text>
                 <AtInputNumber
                   value={member.value}
@@ -107,6 +130,18 @@ export default class Index extends Component {
                     this.memberCounterChange(member.name, value);
                   }}
                 ></AtInputNumber>
+              </View>
+            );
+          })}
+        </AtCard>
+
+        <AtCard title='成绩' className='card'>
+          {this.state.members.map((member) => {
+            return (
+              <View className='cell' key={member.name}>
+                <Text>{member.name}需付：</Text>
+
+                {this.payInfo(member)}
               </View>
             );
           })}
